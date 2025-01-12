@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../../config/firebase';
 import { signOut } from 'firebase/auth';
-import { FaPlus, FaTrash, FaSignOutAlt, FaEdit, FaImage, FaUpload, FaChevronDown } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaSignOutAlt, FaEdit, FaImage, FaUpload, FaChevronDown, FaStar } from 'react-icons/fa';
 import { useProducts } from '../../hooks/useProducts';
 import { validateImageUrl, validateAmazonUrl } from '../../utils/adminUtils';
 import { Product, NewProduct } from '../../types/product';
@@ -20,6 +20,12 @@ const PRODUCT_CATEGORIES = [
   { id: 'tech', label: 'Tech' },
   { id: 'accessories', label: 'Accessories' },
   { id: 'clothing', label: 'Clothing' }
+] as const;
+
+const PRODUCT_REGIONS = [
+  { value: 'global', label: 'Global Only' },
+  { value: 'india', label: 'India Only' },
+  { value: 'both', label: 'Both Regions' }
 ] as const;
 
 const CustomSelect = ({ 
@@ -91,17 +97,11 @@ const Dashboard = () => {
 
   const [newProduct, setNewProduct] = useState<NewProduct>({
     title: '',
-    price: {
-      global: '',
-      india: ''
-    },
+    price: { global: '', india: '' },
     image: '',
-    category: 'plushies',
-    amazonLink: {
-      global: '',
-      india: ''
-    },
-    rating: 5,
+    category: '',
+    amazonLink: { global: '', india: '' },
+    rating: 0,
     region: 'both'
   });
 
@@ -243,17 +243,11 @@ const Dashboard = () => {
         // Reset form
         setNewProduct({
           title: '',
-          price: {
-            global: '',
-            india: ''
-          },
+          price: { global: '', india: '' },
           image: '',
-          category: 'plushies',
-          amazonLink: {
-            global: '',
-            india: ''
-          },
-          rating: 5,
+          category: '',
+          amazonLink: { global: '', india: '' },
+          rating: 0,
           region: 'both'
         });
         setImagePreview('');
@@ -387,6 +381,14 @@ const Dashboard = () => {
     </motion.div>
   );
 
+  // Add rating selection handler
+  const handleRatingChange = (value: number) => {
+    setNewProduct(prev => ({
+      ...prev,
+      rating: value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-primary p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -431,45 +433,45 @@ const Dashboard = () => {
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product) => (
               <motion.div
                 key={product.id}
-                layout
-                className="group bg-secondary rounded-xl overflow-hidden border border-white/5 hover:border-accent/30 transition-colors"
+                className="group bg-secondary rounded-2xl p-6 border border-white/5"
               >
-                <div className="relative aspect-square">
-                  <img
-                    src={product.image}
+                <div className="space-y-4">
+                  <img 
+                    src={product.image} 
                     alt={product.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-48 object-cover rounded-xl"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 group-hover:translate-y-0 transition-transform">
-                    <h3 className="font-medium text-lg mb-1 line-clamp-1">{product.title}</h3>
-                    <p className="text-accent font-mono">{getDisplayPrice(product)}</p>
-                  </div>
-                </div>
-
-                <div className="p-4 space-y-3 border-t border-white/5">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-white/60">Category</span>
-                    <span className="px-3 py-1 bg-accent/10 text-accent rounded-full capitalize text-xs">
-                      {product.category}
-                    </span>
-                  </div>
                   
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-white/60">Links</span>
-                    <div className="flex gap-2">
-                      <span className={`px-2 py-1 rounded-lg text-xs ${
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{product.title}</h3>
+                    
+                    {/* Rating Display */}
+                    <div className="flex items-center space-x-1 mt-2">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar
+                          key={i}
+                          className={`w-4 h-4 ${
+                            i < (product.rating || 5) ? 'text-yellow-400' : 'text-white/10'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-3 py-1 rounded-full text-sm ${
                         product.amazonLink.global 
                           ? 'bg-green-500/10 text-green-500' 
                           : 'bg-red-500/10 text-red-500'
                       }`}>
                         Global
                       </span>
-                      <span className={`px-2 py-1 rounded-lg text-xs ${
+                      <span className={`px-3 py-1 rounded-full text-sm ${
                         product.amazonLink.india 
                           ? 'bg-green-500/10 text-green-500' 
                           : 'bg-red-500/10 text-red-500'
@@ -478,8 +480,8 @@ const Dashboard = () => {
                       </span>
                     </div>
                   </div>
-                  
-                  <div className="pt-2 flex justify-end">
+
+                  <div className="flex justify-end">
                     <motion.button
                       onClick={() => handleDelete(product.id)}
                       className="p-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -500,7 +502,7 @@ const Dashboard = () => {
           <CollectionsManager />
         </div>
 
-        {/* Product Add Modal */}
+        {/* Add Product Modal */}
         <AnimatePresence>
           {isAddingProduct && (
             <motion.div
@@ -513,173 +515,200 @@ const Dashboard = () => {
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-primary rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+                className="bg-secondary max-w-2xl w-full rounded-2xl overflow-hidden shadow-2xl"
               >
-                <div className="p-6 border-b border-white/10">
-                  <h2 className="text-xl font-semibold">Add New Product</h2>
+                {/* Form Header */}
+                <div className="p-6 bg-white/5">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-accent-200 to-accent bg-clip-text text-transparent">
+                    Add New Product
+                  </h2>
+                  <p className="text-white/60 mt-1">Fill in the details for your new product</p>
                 </div>
 
-                {/* Scrollable Form Content */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-130px)]">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Title Input */}
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Title</label>
-                      <input
-                        type="text"
-                        value={newProduct.title}
-                        onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
-                        className="w-full px-3 py-2 bg-secondary border border-white/10 rounded-lg focus:outline-none focus:border-accent"
-                        placeholder="Product Title"
-                      />
-                    </div>
-
-                    {/* Category Selector */}
-                    <CustomSelect
-                      label="Category"
-                      value={newProduct.category}
-                      onChange={(value) => setNewProduct({ ...newProduct, category: value })}
-                      options={PRODUCT_CATEGORIES.map(({ id, label }) => ({
-                        value: id,
-                        label: label
-                      }))}
+                {/* Form Content */}
+                <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+                  {/* Title Input */}
+                  <div className="group">
+                    <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
+                      Product Title
+                    </label>
+                    <input
+                      type="text"
+                      value={newProduct.title}
+                      onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
+                      placeholder="Enter product title..."
                     />
+                  </div>
 
-                    {/* Image URL section */}
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Product Image URL</label>
-                      <div className="space-y-2">
+                  {/* Image URL with Preview */}
+                  <div className="group">
+                    <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
+                      Image URL
+                    </label>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
                         <input
-                          type="text"
+                          type="url"
                           value={newProduct.image}
-                          onChange={(e) => {
-                            setNewProduct({ ...newProduct, image: e.target.value });
-                            handleImagePreview(e.target.value);
-                          }}
-                          placeholder="https://example.com/image.jpg"
-                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent"
+                          onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
+                          placeholder="Enter image URL..."
                         />
-                        {imagePreview && (
-                          <div className="relative w-full aspect-square rounded-lg overflow-hidden">
-                            <img
-                              src={imagePreview}
-                              alt="Preview"
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setNewProduct({ ...newProduct, image: '' });
-                                setImagePreview('');
-                              }}
-                              className="absolute top-2 right-2 p-2 bg-red-500/80 rounded-full hover:bg-red-500"
+                      </div>
+                      {imagePreview && (
+                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
+                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Region and Category Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Region Select */}
+                    <div className="group relative">
+                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
+                        Region
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={newProduct.region}
+                          onChange={(e) => setNewProduct({
+                            ...newProduct,
+                            region: e.target.value as 'global' | 'india' | 'both'
+                          })}
+                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 
+                          focus:bg-white/[0.07] transition-all appearance-none cursor-pointer text-white"
+                        >
+                          {PRODUCT_REGIONS.map((region) => (
+                            <option 
+                              key={region.value} 
+                              value={region.value}
+                              className="bg-secondary hover:bg-white/10"
                             >
-                              <FaTrash className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
+                              {region.label}
+                            </option>
+                          ))}
+                        </select>
+                        {/* Custom Dropdown Arrow */}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <FaChevronDown className="text-accent/50 group-hover:text-accent transition-colors" />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Region Selector */}
-                    <CustomSelect
-                      label="Region Availability"
-                      value={newProduct.region}
-                      onChange={(value) => setNewProduct({ 
-                        ...newProduct, 
-                        region: value as 'global' | 'india' | 'both' 
-                      })}
-                      options={[
-                        { value: 'both', label: '🌍 Global & India' },
-                        { value: 'global', label: '🌎 Global Only' },
-                        { value: 'india', label: '🇮🇳 India Only' }
-                      ]}
-                    />
-
-                    {(newProduct.region === 'global' || newProduct.region === 'both') && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Global Price (USD)</label>
-                          <input
-                            type="text"
-                            value={newProduct.price.global}
-                            onChange={(e) => setNewProduct({
-                              ...newProduct,
-                              price: { ...newProduct.price, global: e.target.value }
-                            })}
-                            placeholder="$0.00"
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent"
-                          />
+                    {/* Category Select */}
+                    <div className="group relative">
+                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
+                        Category
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={newProduct.category}
+                          onChange={(e) => setNewProduct({
+                            ...newProduct,
+                            category: e.target.value
+                          })}
+                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 
+                          focus:bg-white/[0.07] transition-all appearance-none cursor-pointer text-white"
+                        >
+                          <option value="" disabled className="bg-secondary">Select a category</option>
+                          {PRODUCT_CATEGORIES.map((category) => (
+                            <option 
+                              key={category.id} 
+                              value={category.id}
+                              className="bg-secondary hover:bg-white/10"
+                            >
+                              {category.label}
+                            </option>
+                          ))}
+                        </select>
+                        {/* Custom Dropdown Arrow */}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <FaChevronDown className="text-accent/50 group-hover:text-accent transition-colors" />
                         </div>
+                      </div>
+                    </div>
+                  </div>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Global Amazon Link</label>
-                          <input
-                            type="url"
-                            value={newProduct.amazonLink.global}
-                            onChange={(e) => setNewProduct({
-                              ...newProduct,
-                              amazonLink: { ...newProduct.amazonLink, global: e.target.value }
-                            })}
-                            placeholder="https://amazon.com/..."
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent"
-                          />
-                        </div>
-                      </>
-                    )}
+                  {/* Rating Selector */}
+                  <div className="group">
+                    <label className="block text-sm font-medium mb-2 text-white/80">
+                      Rating
+                    </label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setNewProduct({ ...newProduct, rating: star })}
+                          className={`text-2xl transition-transform hover:scale-110 ${
+                            star <= newProduct.rating ? 'text-yellow-400' : 'text-white/20'
+                          }`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                    {(newProduct.region === 'india' || newProduct.region === 'both') && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">India Price (INR)</label>
-                          <input
-                            type="text"
-                            value={newProduct.price.india}
-                            onChange={(e) => setNewProduct({
-                              ...newProduct,
-                              price: { ...newProduct.price, india: e.target.value }
-                            })}
-                            placeholder="₹0.00"
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent"
-                          />
-                        </div>
+                  {/* Amazon Links */}
+                  {(newProduct.region === 'global' || newProduct.region === 'both') && (
+                    <div className="group">
+                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
+                        Global Amazon Link
+                      </label>
+                      <input
+                        type="url"
+                        value={newProduct.amazonLink.global}
+                        onChange={(e) => setNewProduct({
+                          ...newProduct,
+                          amazonLink: { ...newProduct.amazonLink, global: e.target.value }
+                        })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
+                        placeholder="https://amazon.com/..."
+                      />
+                    </div>
+                  )}
 
-                        <div>
-                          <label className="block text-sm font-medium mb-1">India Amazon Link</label>
-                          <input
-                            type="url"
-                            value={newProduct.amazonLink.india}
-                            onChange={(e) => setNewProduct({
-                              ...newProduct,
-                              amazonLink: { ...newProduct.amazonLink, india: e.target.value }
-                            })}
-                            placeholder="https://amazon.in/..."
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-accent"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </form>
+                  {(newProduct.region === 'india' || newProduct.region === 'both') && (
+                    <div className="group">
+                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
+                        India Amazon Link
+                      </label>
+                      <input
+                        type="url"
+                        value={newProduct.amazonLink.india}
+                        onChange={(e) => setNewProduct({
+                          ...newProduct,
+                          amazonLink: { ...newProduct.amazonLink, india: e.target.value }
+                        })}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
+                        placeholder="https://amazon.in/..."
+                      />
+                    </div>
+                  )}
                 </div>
 
-                {/* Fixed Footer with Buttons */}
-                <div className="p-6 border-t border-white/10 bg-primary">
-                  <div className="flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingProduct(false)}
-                      className="px-4 py-2 text-white/60 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      onClick={handleSubmit}
-                      className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/80"
-                    >
-                      Add Product
-                    </button>
-                  </div>
+                {/* Form Footer */}
+                <div className="p-6 bg-white/5 flex justify-end gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setIsAddingProduct(false)}
+                    className="px-6 py-2.5 rounded-xl hover:bg-white/5 text-white/60 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSubmit}
+                    className="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent/90 transition-colors flex items-center gap-2"
+                  >
+                    <span>Add Product</span>
+                    <FaPlus className="text-sm" />
+                  </motion.button>
                 </div>
               </motion.div>
             </motion.div>

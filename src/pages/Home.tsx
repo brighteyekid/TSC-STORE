@@ -273,16 +273,22 @@ const FeaturedProducts = () => {
         const querySnapshot = await getDocs(collection(db, 'products'));
         const allProducts = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Product))
-          .filter(product => 
-            product.region === region || 
-            product.region === 'both'
-          );
+          .filter(product => {
+            // Show product if:
+            // 1. Product region matches user region
+            // 2. Product region is 'both'
+            // 3. Product has a valid link for user's region
+            return (
+              product.region === region ||
+              product.region === 'both' ||
+              (region === 'india' && product.amazonLink.india) ||
+              (region === 'global' && product.amazonLink.global)
+            );
+          });
         
-        // Get 4 random products for featured section
-        const shuffled = allProducts.sort(() => 0.5 - Math.random());
-        setProducts(shuffled.slice(0, 4));
+        setProducts(allProducts.slice(0, 4)); // Only show first 4 products
       } catch (error) {
-        console.error('Error fetching featured products:', error);
+        console.error('Error fetching products:', error);
       }
     };
 

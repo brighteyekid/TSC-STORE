@@ -31,13 +31,19 @@ const Products = () => {
       const allProducts = await fetchProducts();
       const filtered = allProducts.filter(product => {
         const categoryMatch = selectedCategory === 'all' ? true : product.category === selectedCategory;
-        const regionMatch = product.region === 'both' || product.region === region;
+        const regionMatch = 
+          product.region === region ||
+          product.region === 'both' ||
+          (region === 'india' && product.amazonLink.india) ||
+          (region === 'global' && product.amazonLink.global);
+
         return categoryMatch && regionMatch;
       });
       setProducts(filtered);
     };
+
     loadProducts();
-  }, [fetchProducts, selectedCategory, region]);
+  }, [selectedCategory, region, fetchProducts]);
 
   const handleCategoryChange = (newCategory: string) => {
     setSelectedCategory(newCategory);

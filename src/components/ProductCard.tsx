@@ -1,121 +1,109 @@
 import { motion } from 'framer-motion';
-import { FaAmazon, FaShoppingCart, FaStar } from 'react-icons/fa';
+import { FaAmazon, FaStar, FaExternalLinkAlt } from 'react-icons/fa';
 import { useRegion } from '../context/RegionContext';
 import { Product } from '../types/product';
 
 type ProductCardProps = Product;
 
-const ProductCard = ({ title, price, image, amazonLink, rating = 5, region }: ProductCardProps) => {
+const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegion }: ProductCardProps) => {
   const { region: userRegion } = useRegion();
   
-  // Get the appropriate price and link based on region
-  const displayPrice = userRegion === 'india' ? price.india : price.global;
-  const buyLink = userRegion === 'india' ? amazonLink.india : amazonLink.global;
-  
-  // Fallback to other region if preferred region is not available
-  const finalBuyLink = buyLink || (userRegion === 'india' ? amazonLink.global : amazonLink.india) || '#';
+  // Determine which link to use
+  const getBuyLink = () => {
+    if (userRegion === 'india') {
+      return amazonLink.india || '#';
+    } else {
+      return amazonLink.global || '#';
+    }
+  };
+
+  const buyLink = getBuyLink();
 
   return (
     <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -8 }}
-      className="group relative bg-[#0D0D0D] rounded-xl overflow-hidden"
+      className="group relative bg-gradient-to-b from-white/[0.03] to-transparent rounded-3xl overflow-hidden border border-white/[0.05] backdrop-blur-3xl"
     >
-      {/* Decorative Elements */}
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/10 rounded-full blur-2xl group-hover:bg-accent/20 transition-colors duration-500" />
-      <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent/10 rounded-full blur-2xl group-hover:bg-accent/20 transition-colors duration-500" />
+      {/* Premium Glass Effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
-      {/* Border Gradient */}
-      <div className="absolute inset-[1px] rounded-xl bg-gradient-to-b from-white/5 to-transparent" />
-
+      {/* Ambient Light Effects */}
+      <div className="absolute -top-20 -right-20 w-60 h-60 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors duration-700" />
+      <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors duration-700" />
+      
       <div className="relative">
-        {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden">
-          <img
+        {/* Image Container with Premium Border */}
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <motion.img
             src={image}
             alt={title}
-            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
           />
           
-          {/* Region Badge */}
+          {/* Premium Region Badge */}
           {userRegion === 'india' && (
-            <div className="absolute top-4 right-4 bg-accent/80 text-white px-2 py-1 rounded-full text-xs font-medium">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="absolute top-4 right-4 bg-black/30 backdrop-blur-xl text-white px-4 py-2 rounded-full text-xs font-medium border border-white/10 shadow-xl"
+            >
               🇮🇳 India
-            </div>
+            </motion.div>
           )}
           
-          {/* Image Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-transparent to-transparent opacity-80" />
-          
-          {/* Quick Buy Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileHover={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <motion.a
-              href={finalBuyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative px-6 py-3 bg-accent/10 rounded-lg overflow-hidden group/button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className="absolute inset-0 bg-accent opacity-0 group-hover/button:opacity-10 transition-opacity" />
-              <div className="relative flex items-center space-x-2 text-accent">
-                <FaAmazon className="text-xl" />
-                <span className="font-semibold">Buy on Amazon {userRegion === 'india' ? 'India' : ''}</span>
-              </div>
-              <div className="absolute inset-0 border border-accent/20 rounded-lg" />
-            </motion.a>
-          </motion.div>
+          {/* Enhanced Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
         </div>
 
-        {/* Content */}
-        <div className="relative p-6">
-          {/* Title */}
-          <h3 className="font-display text-xl font-semibold mb-2 line-clamp-2 text-white/90 group-hover:text-accent transition-colors">
-            {title}
-          </h3>
-          
-          {/* Rating */}
-          <div className="flex items-center mb-3 space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <FaStar
-                key={i}
-                className={`w-4 h-4 ${
-                  i < rating ? 'text-accent' : 'text-accent/20'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Price and Cart */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-sm text-white/50 font-mono">Price</p>
-              <p className="text-2xl font-bold font-mono text-accent">
-                {displayPrice}
-              </p>
-            </div>
+        {/* Content Section */}
+        <div className="relative p-6 space-y-4">
+          {/* Title with Premium Typography */}
+          <div>
+            <h3 className="font-display text-xl font-semibold mb-2 text-white group-hover:text-white transition-colors duration-300">
+              {title}
+            </h3>
             
-            <motion.a
-              href={finalBuyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative w-12 h-12 flex items-center justify-center group/cart"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <div className="absolute inset-0 bg-accent/10 rounded-full opacity-0 group-hover/cart:opacity-100 transition-opacity" />
-              <FaShoppingCart className="text-xl text-accent" />
-            </motion.a>
+            {/* Animated Rating Stars */}
+            <div className="flex items-center space-x-1.5">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
+                >
+                  <FaStar
+                    className={`w-4 h-4 ${
+                      i < rating ? 'text-yellow-400' : 'text-white/10'
+                    } transform group-hover:scale-110 transition-transform duration-300`}
+                  />
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          {/* Shine Effect */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-            <div className="absolute inset-0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-          </div>
+          {/* Premium Buy Button */}
+          <motion.a
+            href={buyLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full mt-4"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="relative overflow-hidden rounded-2xl group/button">
+              <div className="absolute inset-0 bg-gradient-to-r from-accent via-accent to-accent/80 opacity-10 group-hover/button:opacity-20 transition-opacity duration-500" />
+              <div className="relative px-6 py-3.5 flex items-center justify-center space-x-3 border border-accent/20 rounded-2xl bg-accent/5 group-hover/button:bg-accent/10 transition-all duration-500">
+                <FaAmazon className="text-xl text-accent" />
+                <span className="font-medium text-accent tracking-wide">
+                  Buy Now
+                </span>
+                <FaExternalLinkAlt className="text-xs text-accent/50 group-hover/button:translate-x-1 transition-transform duration-300" />
+              </div>
+            </div>
+          </motion.a>
         </div>
       </div>
     </motion.div>
