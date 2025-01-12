@@ -1,7 +1,7 @@
 
 <div align="center">
-  <img src="public/favicon.ico" alt="TSC Store Logo" width="32" height="32" />
-  # The Social Club Store
+  <img src="public/favicon.ico" alt="TSC Store Logo" width="128" height="128" />
+  The Social Club Store
 </div>
 
 A premium e-commerce platform for anime, gaming, and tech merchandise, built with React and Firebase.
