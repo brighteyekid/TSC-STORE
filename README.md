@@ -149,21 +149,3 @@ Join our [Discord server](https://discord.gg/sseNDMnxJt) for support and updates
 <p align="center">Made with ❤️ by The Social Club Team</p>
 ```
 
-This README:
-1. Provides clear installation instructions
-2. Lists all major features
-3. Includes environment setup details
-4. Shows project structure
-5. Explains security measures
-6. Includes performance optimizations
-7. Has contribution guidelines
-8. Lists team members and acknowledgments
-9. Shows future plans
-10. Includes proper formatting and emojis for better readability
-
-Remember to:
-1. Replace placeholder URLs with actual ones
-2. Update the Discord invite link
-3. Add any specific installation requirements
-4. Update the license information if needed
-5. Add more team members if applicable
