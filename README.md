@@ -147,5 +147,5 @@ Join our [Discord server](https://discord.gg/sseNDMnxJt) for support and updates
 ---
 
 <p align="center">Made with ❤️ by The Social Club Team</p>
-```
+
 
