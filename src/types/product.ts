@@ -12,7 +12,7 @@ export interface Product {
     india?: string;
   };
   rating: number;
-  region: 'global' | 'india' | 'both';
+  region: "global" | "india" | "both";
 }
 
-export type NewProduct = Omit<Product, 'id'>; 
+export type NewProduct = Omit<Product, "id">;

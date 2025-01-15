@@ -1,39 +1,55 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { auth } from '../../config/firebase';
-import { signOut } from 'firebase/auth';
-import { FaPlus, FaTrash, FaSignOutAlt, FaEdit, FaImage, FaUpload, FaChevronDown, FaStar } from 'react-icons/fa';
-import { useProducts } from '../../hooks/useProducts';
-import { validateImageUrl, validateAmazonUrl } from '../../utils/adminUtils';
-import { Product, NewProduct } from '../../types/product';
-import { collection as firestoreCollection, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { Collection } from '../../types/collection';
-import { db } from '../../config/firebase';
-import CollectionsManager from '../../components/CollectionsManager';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../config/firebase";
+import { signOut } from "firebase/auth";
+import {
+  FaPlus,
+  FaTrash,
+  FaSignOutAlt,
+  FaEdit,
+  FaImage,
+  FaUpload,
+  FaChevronDown,
+  FaStar,
+  FaStarHalfAlt,
+} from "react-icons/fa";
+import { useProducts } from "../../hooks/useProducts";
+import { validateImageUrl, validateAmazonUrl } from "../../utils/adminUtils";
+import { Product, NewProduct } from "../../types/product";
+import {
+  collection as firestoreCollection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { Collection } from "../../types/collection";
+import { db } from "../../config/firebase";
+import CollectionsManager from "../../components/CollectionsManager";
 
 // Define product categories
 const PRODUCT_CATEGORIES = [
-  { id: 'plushies', label: 'Plushies' },
-  { id: 'anime', label: 'Anime' },
-  { id: 'gaming', label: 'Gaming' },
-  { id: 'tech', label: 'Tech' },
-  { id: 'accessories', label: 'Accessories' },
-  { id: 'clothing', label: 'Clothing' }
+  { id: "plushies", label: "Plushies" },
+  { id: "anime", label: "Anime" },
+  { id: "gaming", label: "Gaming" },
+  { id: "tech", label: "Tech" },
+  { id: "accessories", label: "Accessories" },
+  { id: "clothing", label: "Clothing" },
 ] as const;
 
 const PRODUCT_REGIONS = [
-  { value: 'global', label: 'Global Only' },
-  { value: 'india', label: 'India Only' },
-  { value: 'both', label: 'Both Regions' }
+  { value: "global", label: "Global Only" },
+  { value: "india", label: "India Only" },
+  { value: "both", label: "Both Regions" },
 ] as const;
 
-const CustomSelect = ({ 
-  label, 
-  value, 
-  onChange, 
-  options 
-}: { 
+const CustomSelect = ({
+  label,
+  value,
+  onChange,
+  options,
+}: {
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -48,7 +64,11 @@ const CustomSelect = ({
         className="w-full px-3 py-2.5 bg-secondary border border-white/10 rounded-lg focus:outline-none focus:border-accent appearance-none cursor-pointer text-white"
       >
         {options.map((option) => (
-          <option key={option.value} value={option.value} className="bg-secondary">
+          <option
+            key={option.value}
+            value={option.value}
+            className="bg-secondary"
+          >
             {option.label}
           </option>
         ))}
@@ -63,18 +83,18 @@ const CustomSelect = ({
 
 const DEFAULT_COLLECTIONS = [
   {
-    id: 'plushies',
-    title: 'Plushies',
-    image: 'https://example.com/default-plushies.jpg',
-    category: 'plushies',
-    description: 'Cute and cuddly plushies'
+    id: "plushies",
+    title: "Plushies",
+    image: "https://example.com/default-plushies.jpg",
+    category: "plushies",
+    description: "Cute and cuddly plushies",
   },
   {
-    id: 'anime',
-    title: 'Anime',
-    image: 'https://example.com/default-anime.jpg',
-    category: 'anime',
-    description: 'Anime merchandise and collectibles'
+    id: "anime",
+    title: "Anime",
+    image: "https://example.com/default-anime.jpg",
+    category: "anime",
+    description: "Anime merchandise and collectibles",
   },
   // Add more default collections
 ];
@@ -85,24 +105,27 @@ const Dashboard = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [formError, setFormError] = useState<string | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<'global' | 'india' | 'both'>('both');
+  const [selectedRegion, setSelectedRegion] = useState<
+    "global" | "india" | "both"
+  >("both");
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isEditingCollection, setIsEditingCollection] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+  const [selectedCollection, setSelectedCollection] =
+    useState<Collection | null>(null);
 
   const { fetchProducts, addProduct, deleteProduct } = useProducts();
   const navigate = useNavigate();
 
   const [newProduct, setNewProduct] = useState<NewProduct>({
-    title: '',
-    price: { global: '', india: '' },
-    image: '',
-    category: '',
-    amazonLink: { global: '', india: '' },
+    title: "",
+    price: { global: "", india: "" },
+    image: "",
+    category: "",
+    amazonLink: { global: "", india: "" },
     rating: 0,
-    region: 'both'
+    region: "both",
   });
 
   useEffect(() => {
@@ -114,7 +137,7 @@ const Dashboard = () => {
       const fetchedProducts = await fetchProducts();
       setProducts(fetchedProducts);
     } catch (err) {
-      setError('Failed to load products');
+      setError("Failed to load products");
     } finally {
       setIsLoading(false);
     }
@@ -123,25 +146,33 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate('/admin/login');
+      navigate("/admin/login");
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error("Error logging out:", error);
     }
   };
 
-  const validateAmazonUrl = (url: string, region: 'global' | 'india'): boolean => {
+  const validateAmazonUrl = (
+    url: string,
+    region: "global" | "india"
+  ): boolean => {
     if (!url) return true; // Empty URLs are valid (optional)
-    
+
     const globalDomains = [
-      'amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 
-      'amazon.it', 'amazon.es', 'amazon.ca'
+      "amazon.com",
+      "amazon.co.uk",
+      "amazon.de",
+      "amazon.fr",
+      "amazon.it",
+      "amazon.es",
+      "amazon.ca",
     ];
-    const indiaDomain = 'amazon.in';
-    
+    const indiaDomain = "amazon.in";
+
     try {
       const urlObj = new URL(url);
-      if (region === 'global') {
-        return globalDomains.some(domain => urlObj.hostname.endsWith(domain));
+      if (region === "global") {
+        return globalDomains.some((domain) => urlObj.hostname.endsWith(domain));
       } else {
         return urlObj.hostname.endsWith(indiaDomain);
       }
@@ -150,43 +181,49 @@ const Dashboard = () => {
     }
   };
 
-  const formatPrice = (price: string, region: 'global' | 'india'): string => {
-    const numericPrice = price.replace(/[^0-9.]/g, '');
-    if (!numericPrice) return '';
-    
+  const formatPrice = (price: string, region: "global" | "india"): string => {
+    const numericPrice = price.replace(/[^0-9.]/g, "");
+    if (!numericPrice) return "";
+
     const amount = parseFloat(numericPrice);
-    if (isNaN(amount)) return '';
-    
-    return region === 'global' 
+    if (isNaN(amount)) return "";
+
+    return region === "global"
       ? `$${amount.toFixed(2)}`
       : `₹${amount.toFixed(2)}`;
   };
 
   const validateForm = async () => {
     setFormError(null);
-    
+
     if (!newProduct.title.trim()) {
-      setFormError('Title is required');
+      setFormError("Title is required");
       return false;
     }
-    
+
     // Validate image URL
     if (!newProduct.image) {
-      setFormError('Image URL is required');
+      setFormError("Image URL is required");
       return false;
     }
 
     // Basic URL validation
-    if (selectedRegion === 'global' || selectedRegion === 'both') {
-      if (newProduct.amazonLink.global && !isValidUrl(newProduct.amazonLink.global)) {
-        setFormError('Please enter a valid URL for global link');
+    if (selectedRegion === "global" || selectedRegion === "both") {
+      if (
+        newProduct.amazonLink.global &&
+        !isValidUrl(newProduct.amazonLink.global)
+      ) {
+        setFormError("Please enter a valid URL for global link");
         return false;
       }
     }
 
-    if (selectedRegion === 'india' || selectedRegion === 'both') {
-      if (newProduct.amazonLink.india && !isValidUrl(newProduct.amazonLink.india)) {
-        setFormError('Please enter a valid URL for India link');
+    if (selectedRegion === "india" || selectedRegion === "both") {
+      if (
+        newProduct.amazonLink.india &&
+        !isValidUrl(newProduct.amazonLink.india)
+      ) {
+        setFormError("Please enter a valid URL for India link");
         return false;
       }
     }
@@ -210,17 +247,17 @@ const Dashboard = () => {
       if (isValid) {
         setImagePreview(url);
       } else {
-        setImagePreview('');
+        setImagePreview("");
       }
     } else {
-      setImagePreview('');
+      setImagePreview("");
     }
   };
 
   const getDisplayPrice = (product: Product) => {
-    if (product.region === 'india') {
+    if (product.region === "india") {
       return product.price.india;
-    } else if (product.region === 'global') {
+    } else if (product.region === "global") {
       return product.price.global;
     } else {
       return `${product.price.global} / ${product.price.india}`;
@@ -236,34 +273,39 @@ const Dashboard = () => {
         return;
       }
 
-      const result = await addProduct(newProduct);
+      const newProductWithRating = {
+        ...newProduct,
+        rating: parseFloat(newProduct.rating.toString()) || 0,
+      };
+
+      const result = await addProduct(newProductWithRating);
       if (result) {
         setProducts([...products, result]);
         setIsAddingProduct(false);
         // Reset form
         setNewProduct({
-          title: '',
-          price: { global: '', india: '' },
-          image: '',
-          category: '',
-          amazonLink: { global: '', india: '' },
+          title: "",
+          price: { global: "", india: "" },
+          image: "",
+          category: "",
+          amazonLink: { global: "", india: "" },
           rating: 0,
-          region: 'both'
+          region: "both",
         });
-        setImagePreview('');
+        setImagePreview("");
       }
     } catch (err) {
-      setFormError('Failed to add product');
+      setFormError("Failed to add product");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await deleteProduct(id);
-        setProducts(products.filter(p => p.id !== id));
+        setProducts(products.filter((p) => p.id !== id));
       } catch (err) {
-        setError('Failed to delete product');
+        setError("Failed to delete product");
       }
     }
   };
@@ -274,35 +316,35 @@ const Dashboard = () => {
 
   const fetchCollections = async () => {
     try {
-      const collectionsRef = firestoreCollection(db, 'collections');
+      const collectionsRef = firestoreCollection(db, "collections");
       const snapshot = await getDocs(collectionsRef);
-      const fetchedCollections = snapshot.docs.map(doc => ({
+      const fetchedCollections = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Collection[];
       setCollections(fetchedCollections);
     } catch (error) {
-      console.error('Error fetching collections:', error);
+      console.error("Error fetching collections:", error);
     }
   };
 
   const handleCollectionUpdate = async (collection: Collection) => {
     try {
-      const collectionRef = doc(db, 'collections', collection.id);
+      const collectionRef = doc(db, "collections", collection.id);
       // Create an object with only the updatable fields
       const updateData = {
         image: collection.image,
-        description: collection.description || '',
+        description: collection.description || "",
         title: collection.title,
-        category: collection.category
+        category: collection.category,
       };
-      
+
       await updateDoc(collectionRef, updateData);
       await fetchCollections();
       setIsEditingCollection(false);
       setSelectedCollection(null);
     } catch (error) {
-      console.error('Error updating collection:', error);
+      console.error("Error updating collection:", error);
     }
   };
 
@@ -323,34 +365,43 @@ const Dashboard = () => {
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-4">Edit Collection</h2>
           {selectedCollection && (
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleCollectionUpdate(selectedCollection);
-            }}
-            className="space-y-4"
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCollectionUpdate(selectedCollection);
+              }}
+              className="space-y-4"
             >
               <div>
-                <label className="block text-sm font-medium mb-1">Image URL</label>
+                <label className="block text-sm font-medium mb-1">
+                  Image URL
+                </label>
                 <input
                   type="url"
                   value={selectedCollection.image}
-                  onChange={(e) => setSelectedCollection({
-                    ...selectedCollection,
-                    image: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setSelectedCollection({
+                      ...selectedCollection,
+                      image: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 bg-secondary border border-white/10 rounded-lg focus:outline-none focus:border-accent"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-sm font-medium mb-1">
+                  Description
+                </label>
                 <textarea
                   value={selectedCollection.description}
-                  onChange={(e) => setSelectedCollection({
-                    ...selectedCollection,
-                    description: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setSelectedCollection({
+                      ...selectedCollection,
+                      description: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 bg-secondary border border-white/10 rounded-lg focus:outline-none focus:border-accent"
                   rows={3}
                 />
@@ -383,10 +434,75 @@ const Dashboard = () => {
 
   // Add rating selection handler
   const handleRatingChange = (value: number) => {
-    setNewProduct(prev => ({
+    setNewProduct((prev) => ({
       ...prev,
-      rating: value
+      rating: value,
     }));
+  };
+
+  const renderRatingInput = (
+    rating: number,
+    onChange: (rating: number) => void
+  ) => {
+    const stars = [];
+
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <div key={i} className="flex items-center">
+          {/* Full star button */}
+          <button
+            type="button"
+            onClick={() => onChange(i)}
+            className={`text-2xl transition-transform hover:scale-110 ${
+              i <= rating ? "text-yellow-400" : "text-white/20"
+            }`}
+          >
+            ★
+          </button>
+
+          {/* Half star button (if not last star) */}
+          {i < rating + 0.5 && i >= rating && (
+            <button
+              type="button"
+              onClick={() => onChange(i + 0.5)}
+              className="text-2xl transition-transform hover:scale-110 relative w-4"
+            >
+              <span className="absolute inset-0 overflow-hidden w-1/2 text-yellow-400">
+                ★
+              </span>
+              <span className="text-white/20">★</span>
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    return <div className="flex gap-1">{stars}</div>;
+  };
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const roundedRating = Math.floor(rating * 2) / 2;
+
+    for (let i = 1; i <= 5; i++) {
+      if (roundedRating >= i) {
+        stars.push(
+          <FaStar key={`star-${i}`} className="w-4 h-4 text-yellow-500" />
+        );
+      } else if (roundedRating >= i - 0.5) {
+        stars.push(
+          <FaStarHalfAlt
+            key={`star-${i}`}
+            className="w-4 h-4 text-yellow-500"
+          />
+        );
+      } else {
+        stars.push(
+          <FaStar key={`star-${i}`} className="w-4 h-4 text-yellow-500" />
+        );
+      }
+    }
+    return stars;
   };
 
   return (
@@ -399,7 +515,9 @@ const Dashboard = () => {
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white via-accent-200 to-accent bg-clip-text text-transparent">
                 Admin Dashboard
               </h1>
-              <p className="text-white/60 mt-1">Manage your products and collections</p>
+              <p className="text-white/60 mt-1">
+                Manage your products and collections
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <motion.button
@@ -411,7 +529,7 @@ const Dashboard = () => {
                 <FaPlus className="text-sm" />
                 <span>Add Product</span>
               </motion.button>
-              
+
               <motion.button
                 onClick={handleLogout}
                 whileHover={{ scale: 1.02 }}
@@ -440,42 +558,41 @@ const Dashboard = () => {
                 className="group bg-secondary rounded-2xl p-6 border border-white/5"
               >
                 <div className="space-y-4">
-                  <img 
-                    src={product.image} 
+                  <img
+                    src={product.image}
                     alt={product.title}
                     className="w-full h-48 object-cover rounded-xl"
                   />
-                  
+
                   <div>
-                    <h3 className="text-lg font-semibold text-white">{product.title}</h3>
-                    
-                    {/* Rating Display */}
+                    <h3 className="text-lg font-semibold text-white">
+                      {product.title}
+                    </h3>
+
+                    {/* Star Rating Display */}
                     <div className="flex items-center space-x-1 mt-2">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < (product.rating || 5) ? 'text-yellow-400' : 'text-white/10'
-                          }`}
-                        />
-                      ))}
+                      {renderStars(product.rating)}
                     </div>
                   </div>
 
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-sm ${
-                        product.amazonLink.global 
-                          ? 'bg-green-500/10 text-green-500' 
-                          : 'bg-red-500/10 text-red-500'
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          product.amazonLink.global
+                            ? "bg-green-500/10 text-green-500"
+                            : "bg-red-500/10 text-red-500"
+                        }`}
+                      >
                         Global
                       </span>
-                      <span className={`px-3 py-1 rounded-full text-sm ${
-                        product.amazonLink.india 
-                          ? 'bg-green-500/10 text-green-500' 
-                          : 'bg-red-500/10 text-red-500'
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          product.amazonLink.india
+                            ? "bg-green-500/10 text-green-500"
+                            : "bg-red-500/10 text-red-500"
+                        }`}
+                      >
                         India
                       </span>
                     </div>
@@ -522,7 +639,9 @@ const Dashboard = () => {
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-accent-200 to-accent bg-clip-text text-transparent">
                     Add New Product
                   </h2>
-                  <p className="text-white/60 mt-1">Fill in the details for your new product</p>
+                  <p className="text-white/60 mt-1">
+                    Fill in the details for your new product
+                  </p>
                 </div>
 
                 {/* Form Content */}
@@ -535,7 +654,9 @@ const Dashboard = () => {
                     <input
                       type="text"
                       value={newProduct.title}
-                      onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, title: e.target.value })
+                      }
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
                       placeholder="Enter product title..."
                     />
@@ -551,14 +672,23 @@ const Dashboard = () => {
                         <input
                           type="url"
                           value={newProduct.image}
-                          onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              image: e.target.value,
+                            })
+                          }
                           className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
                           placeholder="Enter image URL..."
                         />
                       </div>
                       {imagePreview && (
                         <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
-                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       )}
                     </div>
@@ -574,16 +704,21 @@ const Dashboard = () => {
                       <div className="relative">
                         <select
                           value={newProduct.region}
-                          onChange={(e) => setNewProduct({
-                            ...newProduct,
-                            region: e.target.value as 'global' | 'india' | 'both'
-                          })}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              region: e.target.value as
+                                | "global"
+                                | "india"
+                                | "both",
+                            })
+                          }
                           className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 
                           focus:bg-white/[0.07] transition-all appearance-none cursor-pointer text-white"
                         >
                           {PRODUCT_REGIONS.map((region) => (
-                            <option 
-                              key={region.value} 
+                            <option
+                              key={region.value}
                               value={region.value}
                               className="bg-secondary hover:bg-white/10"
                             >
@@ -606,17 +741,21 @@ const Dashboard = () => {
                       <div className="relative">
                         <select
                           value={newProduct.category}
-                          onChange={(e) => setNewProduct({
-                            ...newProduct,
-                            category: e.target.value
-                          })}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              category: e.target.value,
+                            })
+                          }
                           className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 
                           focus:bg-white/[0.07] transition-all appearance-none cursor-pointer text-white"
                         >
-                          <option value="" disabled className="bg-secondary">Select a category</option>
+                          <option value="" disabled className="bg-secondary">
+                            Select a category
+                          </option>
                           {PRODUCT_CATEGORIES.map((category) => (
-                            <option 
-                              key={category.id} 
+                            <option
+                              key={category.id}
                               value={category.id}
                               className="bg-secondary hover:bg-white/10"
                             >
@@ -637,23 +776,26 @@ const Dashboard = () => {
                     <label className="block text-sm font-medium mb-2 text-white/80">
                       Rating
                     </label>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setNewProduct({ ...newProduct, rating: star })}
-                          className={`text-2xl transition-transform hover:scale-110 ${
-                            star <= newProduct.rating ? 'text-yellow-400' : 'text-white/20'
-                          }`}
-                        >
-                          ★
-                        </button>
-                      ))}
-                    </div>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      value={newProduct.rating}
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          rating: parseFloat(e.target.value),
+                        })
+                      }
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
+                      placeholder="Enter rating (0-5)"
+                    />
                   </div>
 
                   {/* Amazon Links */}
-                  {(newProduct.region === 'global' || newProduct.region === 'both') && (
+                  {(newProduct.region === "global" ||
+                    newProduct.region === "both") && (
                     <div className="group">
                       <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
                         Global Amazon Link
@@ -661,17 +803,23 @@ const Dashboard = () => {
                       <input
                         type="url"
                         value={newProduct.amazonLink.global}
-                        onChange={(e) => setNewProduct({
-                          ...newProduct,
-                          amazonLink: { ...newProduct.amazonLink, global: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            amazonLink: {
+                              ...newProduct.amazonLink,
+                              global: e.target.value,
+                            },
+                          })
+                        }
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
                         placeholder="https://amazon.com/..."
                       />
                     </div>
                   )}
 
-                  {(newProduct.region === 'india' || newProduct.region === 'both') && (
+                  {(newProduct.region === "india" ||
+                    newProduct.region === "both") && (
                     <div className="group">
                       <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
                         India Amazon Link
@@ -679,10 +827,15 @@ const Dashboard = () => {
                       <input
                         type="url"
                         value={newProduct.amazonLink.india}
-                        onChange={(e) => setNewProduct({
-                          ...newProduct,
-                          amazonLink: { ...newProduct.amazonLink, india: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            amazonLink: {
+                              ...newProduct.amazonLink,
+                              india: e.target.value,
+                            },
+                          })
+                        }
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
                         placeholder="https://amazon.in/..."
                       />
@@ -737,4 +890,4 @@ const styles = `
   }
 `;
 
-export default Dashboard; 
+export default Dashboard;

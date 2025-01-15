@@ -1,23 +1,63 @@
-import { motion } from 'framer-motion';
-import { FaAmazon, FaStar, FaExternalLinkAlt } from 'react-icons/fa';
-import { useRegion } from '../context/RegionContext';
-import { Product } from '../types/product';
+import { motion } from "framer-motion";
+import {
+  FaAmazon,
+  FaStar,
+  FaExternalLinkAlt,
+  FaRegStar,
+  FaStarHalfAlt,
+} from "react-icons/fa";
+import { useRegion } from "../context/RegionContext";
+import { Product } from "../types/product";
 
 type ProductCardProps = Product;
 
-const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegion }: ProductCardProps) => {
+const ProductCard = ({
+  title,
+  image,
+  amazonLink,
+  rating = 5,
+  region: productRegion,
+}: ProductCardProps) => {
   const { region: userRegion } = useRegion();
-  
+
   // Determine which link to use
   const getBuyLink = () => {
-    if (userRegion === 'india') {
-      return amazonLink.india || '#';
+    if (userRegion === "india") {
+      return amazonLink.india || "#";
     } else {
-      return amazonLink.global || '#';
+      return amazonLink.global || "#";
     }
   };
 
   const buyLink = getBuyLink();
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const roundedRating = Math.floor(rating * 2) / 2; // Use Math.floor to avoid rounding up
+
+    for (let i = 1; i <= 5; i++) {
+      if (roundedRating >= i) {
+        // Full star
+        stars.push(
+          <FaStar key={`star-${i}`} className="w-4 h-4 text-yellow-500" />
+        );
+      } else if (roundedRating >= i - 0.5) {
+        // Half star
+        stars.push(
+          <FaStarHalfAlt
+            key={`star-${i}`}
+            className="w-4 h-4 text-yellow-500"
+          />
+        );
+      } else {
+        // Empty star
+        stars.push(
+          <FaRegStar key={`star-${i}`} className="w-4 h-4 text-yellow-500" />
+        );
+      }
+    }
+    return stars;
+  };
 
   return (
     <motion.div
@@ -28,11 +68,11 @@ const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegi
     >
       {/* Premium Glass Effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
+
       {/* Ambient Light Effects */}
       <div className="absolute -top-20 -right-20 w-60 h-60 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors duration-700" />
       <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors duration-700" />
-      
+
       <div className="relative">
         {/* Image Container with Premium Border */}
         <div className="relative aspect-[4/3] overflow-hidden">
@@ -41,10 +81,10 @@ const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegi
             alt={title}
             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
           />
-          
+
           {/* Premium Region Badge */}
-          {userRegion === 'india' && (
-            <motion.div 
+          {userRegion === "india" && (
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               className="absolute top-4 right-4 bg-black/30 backdrop-blur-xl text-white px-4 py-2 rounded-full text-xs font-medium border border-white/10 shadow-xl"
@@ -52,7 +92,7 @@ const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegi
               🇮🇳 India
             </motion.div>
           )}
-          
+
           {/* Enhanced Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
         </div>
@@ -64,23 +104,10 @@ const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegi
             <h3 className="font-display text-xl font-semibold mb-2 text-white group-hover:text-white transition-colors duration-300">
               {title}
             </h3>
-            
-            {/* Animated Rating Stars */}
-            <div className="flex items-center space-x-1.5">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
-                >
-                  <FaStar
-                    className={`w-4 h-4 ${
-                      i < rating ? 'text-yellow-400' : 'text-white/10'
-                    } transform group-hover:scale-110 transition-transform duration-300`}
-                  />
-                </motion.div>
-              ))}
+
+            {/* Star Rating */}
+            <div className="flex items-center space-x-1 mt-2">
+              {renderStars(rating)}
             </div>
           </div>
 
@@ -110,4 +137,4 @@ const ProductCard = ({ title, image, amazonLink, rating = 5, region: productRegi
   );
 };
 
-export default ProductCard; 
+export default ProductCard;
