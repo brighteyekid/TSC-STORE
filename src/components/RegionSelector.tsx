@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { useRegion } from '../context/RegionContext';
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useRegion } from "../context/RegionContext";
 
 const RegionSelector = () => {
   const { region, setRegion } = useRegion();
@@ -8,16 +8,16 @@ const RegionSelector = () => {
 
   useEffect(() => {
     // Check if user has already selected a region
-    const hasSelectedRegion = localStorage.getItem('hasSelectedRegion');
+    const hasSelectedRegion = localStorage.getItem("hasSelectedRegion");
     if (!hasSelectedRegion) {
       setShowSelector(true);
     }
   }, []);
 
-  const handleRegionSelect = (selectedRegion: 'global' | 'india') => {
+  const handleRegionSelect = (selectedRegion: "global" | "india") => {
     setRegion(selectedRegion);
-    localStorage.setItem('region', selectedRegion);
-    localStorage.setItem('hasSelectedRegion', 'true');
+    localStorage.setItem("region", selectedRegion);
+    localStorage.setItem("hasSelectedRegion", "true");
     setShowSelector(false);
   };
 
@@ -37,19 +37,19 @@ const RegionSelector = () => {
       >
         <h2 className="text-2xl font-bold mb-4">Select Your Region</h2>
         <p className="text-white/60 mb-6">
-          Choose your preferred region to see relevant products and prices.
-          You can change this later in the navigation bar.
+          Choose your preferred region to see relevant products. You can change
+          this later in the navigation bar.
         </p>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleRegionSelect('global')}
+            onClick={() => handleRegionSelect("global")}
             className={`p-4 rounded-xl border-2 transition-colors ${
-              region === 'global'
-                ? 'border-accent bg-accent/10'
-                : 'border-white/10 hover:border-white/20'
+              region === "global"
+                ? "border-accent bg-accent/10"
+                : "border-white/10 hover:border-white/20"
             }`}
           >
             <span className="text-2xl mb-2">🌍</span>
@@ -60,11 +60,11 @@ const RegionSelector = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleRegionSelect('india')}
+            onClick={() => handleRegionSelect("india")}
             className={`p-4 rounded-xl border-2 transition-colors ${
-              region === 'india'
-                ? 'border-accent bg-accent/10'
-                : 'border-white/10 hover:border-white/20'
+              region === "india"
+                ? "border-accent bg-accent/10"
+                : "border-white/10 hover:border-white/20"
             }`}
           >
             <span className="text-2xl mb-2">🇮🇳</span>
