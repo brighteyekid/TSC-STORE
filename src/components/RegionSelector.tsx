@@ -74,7 +74,7 @@ const RegionSelector = () => {
         </div>
 
         <p className="mt-6 text-sm text-white/40 text-center">
-          This helps us show you relevant products and prices
+          This helps us show you relevant products
         </p>
       </motion.div>
     </motion.div>
