@@ -501,7 +501,7 @@ const Home = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              Premium Gaming & Anime Collections
+              Welcome to our amazon affiliate store
             </motion.p>
 
             {/* Enhanced CTA Buttons */}
