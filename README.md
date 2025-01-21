@@ -142,7 +142,7 @@ Join our [Discord server](https://discord.gg/sseNDMnxJt) for support and updates
 - [ ] Enhanced payment integration
 - [ ] Advanced analytics
 - [ ] AI-powered recommendations
-- [ ] Expanded product categories
+- [✅] Expanded product categories
 
 ---
 
