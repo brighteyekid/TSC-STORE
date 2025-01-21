@@ -7,6 +7,7 @@ export interface Product {
   };
   image: string;
   category: string;
+  subcategory?: string;
   amazonLink: {
     global?: string;
     india?: string;

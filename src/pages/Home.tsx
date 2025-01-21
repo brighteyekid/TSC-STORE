@@ -320,7 +320,7 @@ const FeaturedProducts = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map((product) => (
-        <ProductCard key={product.id} {...product} />
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );
@@ -382,6 +382,16 @@ const Home = () => {
   // You can use FEATURED_CATEGORIES as a fallback if collections haven't loaded yet
   const displayCollections =
     collections.length > 0 ? collections : FEATURED_CATEGORIES;
+
+  const renderProducts = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {featuredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#080808] overflow-hidden">
@@ -704,7 +714,7 @@ const Home = () => {
           {/* Products Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
-              <ProductCard key={product.id} {...product} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
 

@@ -80,6 +80,27 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Legal Links */}
+          <div className="space-y-6">
+            <h4 className="text-lg font-semibold text-white/90">Legal</h4>
+            <ul className="space-y-4">
+              <motion.li 
+                className="group"
+                whileHover={{ x: 4 }}
+              >
+                <a 
+                  href="/terms"
+                  className="relative inline-flex items-center text-white/60 hover:text-white transition-colors"
+                >
+                  <span className="absolute -left-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    •
+                  </span>
+                  Terms & Conditions
+                </a>
+              </motion.li>
+            </ul>
+          </div>
+
           {/* Social Links */}
           <div className="space-y-6">
             <h4 className="text-lg font-semibold text-white/90">Connect</h4>

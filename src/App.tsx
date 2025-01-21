@@ -12,6 +12,7 @@ import RegionSelector from './components/RegionSelector';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import { useEffect, useState } from 'react';
 import Bootsplash from './components/Bootsplash';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 // Add these type declarations at the top of the file, after imports
 interface FirebugWindow extends Window {
@@ -71,6 +72,14 @@ function AnimatedRoutes() {
           element={
             <MainLayout>
               <Products />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <MainLayout>
+              <TermsAndConditions />
             </MainLayout>
           }
         />

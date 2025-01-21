@@ -13,6 +13,9 @@ import {
   FaChevronDown,
   FaStar,
   FaStarHalfAlt,
+  FaBox,
+  FaLayerGroup,
+  FaCog,
 } from "react-icons/fa";
 import { useProducts } from "../../hooks/useProducts";
 import { validateImageUrl, validateAmazonUrl } from "../../utils/adminUtils";
@@ -27,6 +30,9 @@ import {
 import { Collection } from "../../types/collection";
 import { db } from "../../config/firebase";
 import CollectionsManager from "../../components/CollectionsManager";
+import ProductsManager from '../../components/admin/ProductsManager';
+import CategoriesManager from '../../components/admin/CategoriesManager';
+import Settings from '../../components/admin/Settings';
 
 // Define product categories
 const PRODUCT_CATEGORIES = [
@@ -99,7 +105,10 @@ const DEFAULT_COLLECTIONS = [
   // Add more default collections
 ];
 
+type DashboardTab = 'products' | 'collections' | 'categories' | 'settings';
+
 const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState<DashboardTab>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -505,372 +514,97 @@ const Dashboard = () => {
     return stars;
   };
 
+  const tabs = [
+    { id: 'products', label: 'Products', icon: FaBox },
+    { id: 'collections', label: 'Collections', icon: FaLayerGroup },
+    { id: 'categories', label: 'Categories', icon: FaLayerGroup },
+    { id: 'settings', label: 'Settings', icon: FaCog },
+  ];
+
   return (
-    <div className="min-h-screen bg-primary p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="bg-secondary rounded-2xl p-6 shadow-lg border border-white/5">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white via-accent-200 to-accent bg-clip-text text-transparent">
-                Admin Dashboard
-              </h1>
-              <p className="text-white/60 mt-1">
-                Manage your products and collections
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <motion.button
-                onClick={() => setIsAddingProduct(true)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 bg-accent rounded-xl flex items-center gap-2 hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
-              >
-                <FaPlus className="text-sm" />
-                <span>Add Product</span>
-              </motion.button>
-
-              <motion.button
-                onClick={handleLogout}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl flex items-center gap-2 transition-colors"
-              >
-                <FaSignOutAlt className="text-sm" />
-                <span>Logout</span>
-              </motion.button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-primary">
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 h-full w-64 bg-secondary border-r border-white/10">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-accent-200 to-accent bg-clip-text text-transparent">
+            Admin Panel
+          </h1>
         </div>
 
-        {/* Products Section */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white/90">Products</h2>
-            <p className="text-white/60">{products.length} items</p>
-          </div>
-
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <motion.div
-                key={product.id}
-                className="group bg-secondary rounded-2xl p-6 border border-white/5"
-              >
-                <div className="space-y-4">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="w-full h-48 object-cover rounded-xl"
-                  />
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">
-                      {product.title}
-                    </h3>
-
-                    {/* Star Rating Display */}
-                    <div className="flex items-center space-x-1 mt-2">
-                      {renderStars(product.rating)}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          product.amazonLink.global
-                            ? "bg-green-500/10 text-green-500"
-                            : "bg-red-500/10 text-red-500"
-                        }`}
-                      >
-                        Global
-                      </span>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          product.amazonLink.india
-                            ? "bg-green-500/10 text-green-500"
-                            : "bg-red-500/10 text-red-500"
-                        }`}
-                      >
-                        India
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <motion.button
-                      onClick={() => handleDelete(product.id)}
-                      className="p-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <FaTrash />
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Collections Section */}
-        <div className="mt-12">
-          <CollectionsManager />
-        </div>
-
-        {/* Add Product Modal */}
-        <AnimatePresence>
-          {isAddingProduct && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        {/* Navigation */}
+        <nav className="mt-6">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as DashboardTab)}
+              className={`w-full px-6 py-4 flex items-center space-x-3 transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-accent/10 text-accent border-r-2 border-accent'
+                  : 'text-white/60 hover:bg-white/5'
+              }`}
             >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-secondary max-w-2xl w-full rounded-2xl overflow-hidden shadow-2xl"
-              >
-                {/* Form Header */}
-                <div className="p-6 bg-white/5">
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-accent-200 to-accent bg-clip-text text-transparent">
-                    Add New Product
-                  </h2>
-                  <p className="text-white/60 mt-1">
-                    Fill in the details for your new product
-                  </p>
-                </div>
+              <tab.icon className="text-lg" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
 
-                {/* Form Content */}
-                <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
-                  {/* Title Input */}
-                  <div className="group">
-                    <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
-                      Product Title
-                    </label>
-                    <input
-                      type="text"
-                      value={newProduct.title}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, title: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
-                      placeholder="Enter product title..."
-                    />
-                  </div>
+        {/* Sign Out Button */}
+        <button
+          onClick={handleLogout}
+          className="absolute bottom-6 left-6 right-6 px-6 py-3 flex items-center space-x-3 text-white/60 hover:text-white/80 transition-colors"
+        >
+          <FaSignOutAlt />
+          <span>Sign Out</span>
+        </button>
+      </div>
 
-                  {/* Image URL with Preview */}
-                  <div className="group">
-                    <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
-                      Image URL
-                    </label>
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <input
-                          type="url"
-                          value={newProduct.image}
-                          onChange={(e) =>
-                            setNewProduct({
-                              ...newProduct,
-                              image: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
-                          placeholder="Enter image URL..."
-                        />
-                      </div>
-                      {imagePreview && (
-                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Region and Category Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Region Select */}
-                    <div className="group relative">
-                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
-                        Region
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={newProduct.region}
-                          onChange={(e) =>
-                            setNewProduct({
-                              ...newProduct,
-                              region: e.target.value as
-                                | "global"
-                                | "india"
-                                | "both",
-                            })
-                          }
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 
-                          focus:bg-white/[0.07] transition-all appearance-none cursor-pointer text-white"
-                        >
-                          {PRODUCT_REGIONS.map((region) => (
-                            <option
-                              key={region.value}
-                              value={region.value}
-                              className="bg-secondary hover:bg-white/10"
-                            >
-                              {region.label}
-                            </option>
-                          ))}
-                        </select>
-                        {/* Custom Dropdown Arrow */}
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <FaChevronDown className="text-accent/50 group-hover:text-accent transition-colors" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Category Select */}
-                    <div className="group relative">
-                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
-                        Category
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={newProduct.category}
-                          onChange={(e) =>
-                            setNewProduct({
-                              ...newProduct,
-                              category: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 
-                          focus:bg-white/[0.07] transition-all appearance-none cursor-pointer text-white"
-                        >
-                          <option value="" disabled className="bg-secondary">
-                            Select a category
-                          </option>
-                          {PRODUCT_CATEGORIES.map((category) => (
-                            <option
-                              key={category.id}
-                              value={category.id}
-                              className="bg-secondary hover:bg-white/10"
-                            >
-                              {category.label}
-                            </option>
-                          ))}
-                        </select>
-                        {/* Custom Dropdown Arrow */}
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <FaChevronDown className="text-accent/50 group-hover:text-accent transition-colors" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Rating Selector */}
-                  <div className="group">
-                    <label className="block text-sm font-medium mb-2 text-white/80">
-                      Rating
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="5"
-                      value={newProduct.rating}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          rating: parseFloat(e.target.value),
-                        })
-                      }
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
-                      placeholder="Enter rating (0-5)"
-                    />
-                  </div>
-
-                  {/* Amazon Links */}
-                  {(newProduct.region === "global" ||
-                    newProduct.region === "both") && (
-                    <div className="group">
-                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
-                        Global Amazon Link
-                      </label>
-                      <input
-                        type="url"
-                        value={newProduct.amazonLink.global}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            amazonLink: {
-                              ...newProduct.amazonLink,
-                              global: e.target.value,
-                            },
-                          })
-                        }
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
-                        placeholder="https://amazon.com/..."
-                      />
-                    </div>
-                  )}
-
-                  {(newProduct.region === "india" ||
-                    newProduct.region === "both") && (
-                    <div className="group">
-                      <label className="block text-sm font-medium mb-2 text-white/80 group-focus-within:text-accent transition-colors">
-                        India Amazon Link
-                      </label>
-                      <input
-                        type="url"
-                        value={newProduct.amazonLink.india}
-                        onChange={(e) =>
-                          setNewProduct({
-                            ...newProduct,
-                            amazonLink: {
-                              ...newProduct.amazonLink,
-                              india: e.target.value,
-                            },
-                          })
-                        }
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:bg-white/[0.07] transition-all"
-                        placeholder="https://amazon.in/..."
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Form Footer */}
-                <div className="p-6 bg-white/5 flex justify-end gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setIsAddingProduct(false)}
-                    className="px-6 py-2.5 rounded-xl hover:bg-white/5 text-white/60 hover:text-white transition-colors"
-                  >
-                    Cancel
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleSubmit}
-                    className="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent/90 transition-colors flex items-center gap-2"
-                  >
-                    <span>Add Product</span>
-                    <FaPlus className="text-sm" />
-                  </motion.button>
-                </div>
-              </motion.div>
+      {/* Main Content */}
+      <div className="ml-64 p-8">
+        <AnimatePresence mode="wait">
+          {activeTab === 'products' && (
+            <motion.div
+              key="products"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <ProductsManager />
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Collection Edit Modal */}
-        <AnimatePresence>
-          {isEditingCollection && selectedCollection && <CollectionEditModal />}
+          {activeTab === 'collections' && (
+            <motion.div
+              key="collections"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <CollectionsManager />
+            </motion.div>
+          )}
+
+          {activeTab === 'categories' && (
+            <motion.div
+              key="categories"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <CategoriesManager />
+            </motion.div>
+          )}
+
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <Settings />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>

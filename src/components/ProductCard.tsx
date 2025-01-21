@@ -9,23 +9,19 @@ import {
 import { useRegion } from "../context/RegionContext";
 import { Product } from "../types/product";
 
-type ProductCardProps = Product;
+interface ProductCardProps {
+  product: Product;
+}
 
-const ProductCard = ({
-  title,
-  image,
-  amazonLink,
-  rating = 5,
-  region: productRegion,
-}: ProductCardProps) => {
-  const { region: userRegion } = useRegion();
+const ProductCard = ({ product }: ProductCardProps) => {
+  const { region } = useRegion();
 
   // Determine which link to use
   const getBuyLink = () => {
-    if (userRegion === "india") {
-      return amazonLink.india || "#";
+    if (region === "india") {
+      return product.amazonLink.india || "#";
     } else {
-      return amazonLink.global || "#";
+      return product.amazonLink.global || "#";
     }
   };
 
@@ -59,6 +55,15 @@ const ProductCard = ({
     return stars;
   };
 
+  const getCategoryLabel = (category: string) => {
+    if (category.startsWith('men-')) return 'Men\'s';
+    if (category.startsWith('women-')) return 'Women\'s';
+    if (category.startsWith('unisex-')) return 'Unisex';
+    return category.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -77,13 +82,13 @@ const ProductCard = ({
         {/* Image Container with Premium Border */}
         <div className="relative aspect-[4/3] overflow-hidden">
           <motion.img
-            src={image}
-            alt={title}
+            src={product.image}
+            alt={product.title}
             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
           />
 
           {/* Premium Region Badge */}
-          {userRegion === "india" && (
+          {region === "india" && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -102,13 +107,24 @@ const ProductCard = ({
           {/* Title with Premium Typography */}
           <div>
             <h3 className="font-display text-xl font-semibold mb-2 text-white group-hover:text-white transition-colors duration-300">
-              {title}
+              {product.title}
             </h3>
 
             {/* Star Rating */}
             <div className="flex items-center space-x-1 mt-2">
-              {renderStars(rating)}
+              {renderStars(product.rating)}
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-2">
+            <span className="px-2 py-1 bg-primary/50 rounded-lg text-xs">
+              {getCategoryLabel(product.category)}
+            </span>
+            {product.subcategory && (
+              <span className="px-2 py-1 bg-primary/50 rounded-lg text-xs">
+                {getCategoryLabel(product.subcategory)}
+              </span>
+            )}
           </div>
 
           {/* Premium Buy Button */}
