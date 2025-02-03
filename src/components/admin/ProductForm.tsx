@@ -35,6 +35,8 @@ const CLOTHING_SUBCATEGORIES = {
 
 const TECH_SUBCATEGORIES = [
   { value: 'tech-gaming', label: 'Gaming Accessories' },
+  { value: 'tech-smartphones', label: 'Smartphones' },
+  { value: 'tech-pc-laptops', label: 'PC/Laptops' },
   { value: 'tech-audio', label: 'Audio & Headphones' },
   { value: 'tech-mobile', label: 'Mobile Accessories' },
   { value: 'tech-computer', label: 'Computer Accessories' },
