@@ -183,7 +183,7 @@ const WhyChooseUs = () => {
   const stats = [
     { value: "3.9k+", label: "Active Members" },
     { value: "390+", label: "Products" },
-    { value: "24/7", label: "Support" },
+    { value: "7+", label: "Categories" },
     { value: "100%", label: "handpicked" },
   ];
 
