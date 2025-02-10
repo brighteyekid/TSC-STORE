@@ -122,7 +122,7 @@ const CommunitySection = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
             {[
               { icon: FaUsers, value: "3.9k+", label: "Members" },
-              { icon: FaBox, value: "20+", label: "Products" },
+              { icon: FaBox, value: "390+", label: "Products" },
               { icon: FaStar, value: "4.3/5", label: "Rating" },
               { icon: FaHeart, value: "100%", label: "Satisfaction" },
             ].map((stat, index) => (
@@ -182,9 +182,9 @@ const CommunitySection = () => {
 const WhyChooseUs = () => {
   const stats = [
     { value: "3.9k+", label: "Active Members" },
-    { value: "20+", label: "Products" },
+    { value: "390+", label: "Products" },
     { value: "24/7", label: "Support" },
-    { value: "100%", label: "Satisfaction" },
+    { value: "100%", label: "handpicked" },
   ];
 
   return (
@@ -225,11 +225,9 @@ const WhyChooseUs = () => {
             className="space-y-6"
           >
             <p className="text-lg text-white/80 leading-relaxed">
-              Our Discord server was created with the mission of helping people
-              connect and help them spend quality time in a safe, non-toxic
-              environment. Maintaining this community takes a lot of effort and
-              dedication, which is why we've launched this blog.
+            Our Discord server was built to bring people together, offering a safe, welcoming space where everyone can connect and enjoy quality time in a non-toxic environment. Maintaining and growing this community takes dedication and continuous effort, which inspired us to launch this blog.
             </p>
+
 
             <p className="text-lg text-white/80 leading-relaxed">
               By shopping through our Amazon affiliate links you, directly
